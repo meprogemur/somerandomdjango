@@ -13,8 +13,23 @@ h1 {
 }
 
 textarea {
-    height: 90vh;
+    position: relative;
+    top:30px;
+    left: 34px;
+    height: 60vh;
     width: 80%;
+}
+
+#bb{
+    position: absolute;
+    left:45px;
+    top:40px;
+}
+
+input[type=submit]{
+    position: absolute;
+    left:50px;
+    top: 75%;
 }
 
 .main {

@@ -3,6 +3,7 @@ from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 import markdown
+import random
 
 from . import util
 
@@ -24,13 +25,18 @@ def title(request, title):
         "title":title
     })
 
+def ran(request):
+    title = random.choice(util.list_entries())
+    url = reverse('title', kwargs={'title': title})
+    return HttpResponseRedirect(url)    
+
 def page(request):
     if request.method == "POST":
         title = request.POST["title"]
         if title in util.list_entries():
             return HttpResponse("already exist")
         elif title =="" or request.POST['content'] =="":
-            return HttpResponse("please feel all")
+            return HttpResponse("please fill all")
         
         with open(f"entries/{title}.md", 'w') as f:
             f.write(request.POST["content"])
@@ -39,3 +45,35 @@ def page(request):
         #return HttpResponseRedirect(reverse("title"))
 
     return render(request, "encyclopedia/new.html")
+
+def search(request):
+    result = []
+    if request.method == "GET":
+        for title in util.list_entries():
+            tit = title.lower()
+            check = request.GET["q"].lower()
+            if (tit.find(check) == -1):
+                pass
+            else:
+                result.append(title)
+            if title.lower() == check:
+                return HttpResponseRedirect(reverse("title", kwargs={'title': title}))
+        return render(request, "encyclopedia/slist.html", {
+            "q": check,
+            "match": result
+        })
+
+def edit(request, ed):
+    if request.method == "POST":
+        if request.POST["edited"] == "":
+            return HttpResponse("can't be blank")
+        with open("entries/" + ed + ".md", 'w') as f:
+            f.write(request.POST["edited"])
+        return HttpResponseRedirect(reverse('title', kwargs={'title': ed}))
+    with open("entries/" + ed + ".md", 'r') as f:
+        txt = f.read()
+    
+    return render(request, "encyclopedia/edit.html", {
+        "text":txt,
+        "title":ed
+    })
